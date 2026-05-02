@@ -1,65 +1,90 @@
-import Image from "next/image";
+"use client";
+
+import React, { useState } from "react";
+import axios from "axios";
+import { useRouter } from "next/navigation";
+import SearchBar from "@/src/components/SearchBar";
+import MovieList from "@/src/components/MovieList";
 
 export default function Home() {
+  const [query, setQuery] = useState("");
+  const [movies, setMovies] = useState([]);
+  const router = useRouter();
+
+  const API_URL = "http://localhost:5000/api";
+
+  const searchMovies = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!query) return;
+    try {
+      const response = await axios.get(`${API_URL}/movies/search?query=${query}`);
+      setMovies(response.data);
+    } catch (error) {
+      console.error("Error searching movies:", error);
+    }
+  };
+
+  const addToFavorites = async (movie: any) => {
+    const storedUser = localStorage.getItem("user");
+    if (!storedUser) {
+      alert("Please sign in first!");
+      router.push("/login");
+      return;
+    }
+    const user = JSON.parse(storedUser);
+    try {
+      await axios.post(`${API_URL}/favorites`, {
+        user_id: user.id,
+        movie_id: movie.id,
+        title: movie.title,
+        poster_path: movie.poster_path,
+      });
+      alert(`"${movie.title}" added to your Want to Watch list!`);
+    } catch (error: any) {
+      if (error.response?.status === 400) alert("Already in your list!");
+    }
+  };
+
+  const addToWatched = async (movie: any, rating: number) => {
+    const storedUser = localStorage.getItem("user");
+    if (!storedUser) {
+      alert("Please sign in first!");
+      router.push("/login");
+      return;
+    }
+    const user = JSON.parse(storedUser);
+    try {
+      await axios.post(`${API_URL}/watched`, {
+        user_id: user.id,
+        movie_id: movie.id,
+        title: movie.title,
+        poster_path: movie.poster_path,
+        rating: rating, 
+      });
+      alert(`Rated ${rating} stars! Added to your My Ratings list.`);
+    } catch (error: any) {
+      if (error.response?.status === 400) alert("You have already rated this movie!");
+    }
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+    <div className="pb-20 flex flex-col items-center">
+      <div className="text-center mt-12 mb-8 max-w-2xl">
+        <h1 className="text-4xl md:text-5xl font-black text-[#382110] mb-4 tracking-tight">
+          Search & Rate <span className="text-[#FF6B35]">Your Next Watch</span>
+        </h1>
+        <p className="text-[#5a4634] text-lg">
+          Search thousands of movies, add them to your list, and review what you've watched.
+        </p>
+      </div>
+
+      <div className="w-full max-w-4xl">
+        <SearchBar query={query} setQuery={setQuery} onSearch={searchMovies} />
+      </div>
+
+      <div className="w-full mt-8">
+        <MovieList movies={movies} onAddList={addToFavorites} onAddWatched={addToWatched} />
+      </div>
     </div>
   );
 }
