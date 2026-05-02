@@ -22,7 +22,7 @@ export default function Register() {
     }
 
     try {
-      await axios.post("http://localhost:5000/api/register", { email, username, password });
+      await axios.post("https://tutam-sbd-10-kayla-joanna-240648701.vercel.app/api/register", { email, username, password });
       alert("Registrasi berhasil! Silakan login.");
       router.push("/login");
     } catch (err: any) {

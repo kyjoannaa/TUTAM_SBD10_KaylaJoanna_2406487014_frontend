@@ -8,7 +8,7 @@ import MovieCard from "@/src/components/MovieCard";
 export default function MyList() {
   const [favorites, setFavorites] = useState([]);
   const router = useRouter();
-  const API_URL = "http://localhost:5000/api";
+  const API_URL = "https://tutam-sbd-10-kayla-joanna-240648701.vercel.app/api";
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");

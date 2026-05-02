@@ -14,7 +14,7 @@ export default function Login() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:5000/api/login", { username, password });
+      const response = await axios.post("https://tutam-sbd-10-kayla-joanna-240648701.vercel.app/api/login", { username, password });
       localStorage.setItem("user", JSON.stringify(response.data));
       router.push("/");
       router.refresh(); 

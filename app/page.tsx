@@ -11,7 +11,7 @@ export default function Home() {
   const [movies, setMovies] = useState([]);
   const router = useRouter();
 
-  const API_URL = "http://localhost:5000/api";
+  const API_URL = "https://tutam-sbd-10-kayla-joanna-240648701.vercel.app/api";
 
   const searchMovies = async (e: React.FormEvent) => {
     e.preventDefault();
